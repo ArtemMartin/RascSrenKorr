@@ -1,7 +1,7 @@
 VERSION 5.00
 Begin VB.Form Form1 
    BackColor       =   &H0000C0C0&
-   Caption         =   "Расчет среднего отклонения"
+   Caption         =   "Расчет среднего отклонения(v1.3)"
    ClientHeight    =   8970
    ClientLeft      =   2010
    ClientTop       =   3030
@@ -1380,27 +1380,15 @@ Dim arr2() As String
 Dim x As Double, y As Double
 Dim dlinaMass As Integer
 Dim nX As Integer, nY As Integer
+Dim xy() As Variant
 
 On Error GoTo ErrorHandler
 
 If KeyCode = 13 Then
     str = pXc
     arr = Split(str, " ")
-    'определить длину масива если характер цели из двух слов
-    dlinaMass = sizeMass(arr)
-    If dlinaMass = 9 Then
-        nX = 3: nY = 4
-    Else
-        nX = 4: nY = 5
-    End If
-    If arr(0) = "Цель" Or arr(0) = "????" Then
-        arr2 = Split(arr(nX), "Y")
-        x = CDbl(arr2(0))
-        arr2 = Split(arr(nY), "H")
-        y = CDbl(arr2(0))
-    Else
-        x = CDbl(arr(0)): y = CDbl(arr(1))
-    End If
+    xy = getXY(arr)
+    x = CDbl(xy(0)): y = CDbl(xy(1))
     x = x Mod 100000: y = y Mod 100000
     pXc = x: pYc = y
 Else
@@ -1430,26 +1418,16 @@ Dim arr2() As String
 Dim x As Double, y As Double
 Dim dlinaMass As Integer
 Dim nX As Integer, nY As Integer
+Dim xy() As Variant
+
 On Error GoTo ErrorHandler
 
 If KeyCode = 13 Then
     str = pXr.Text
     arr = Split(str, " ")
-    'определить длину масива если характер цели из двух слов
-    dlinaMass = sizeMass(arr)
-    If dlinaMass = 10 Then
-        nX = 4: nY = 5
-    Else
-        nX = 5: nY = 6
-    End If
-    If arr(0) = "Разрыв" Or arr(0) = "??????" Then
-        arr2 = Split(arr(nX), "Y")
-        x = CDbl(arr2(0))
-        arr2 = Split(arr(nY), "H")
-        y = CDbl(arr2(0))
-    Else
-        x = CDbl(arr(0)): y = CDbl(arr(1))
-    End If
+    xy = getXY(arr)
+   
+    x = CDbl(xy(0)): y = CDbl(xy(1))
     x = x Mod 100000: y = y Mod 100000
     pXr = x: pYr = y
 Else
@@ -1458,6 +1436,45 @@ End If
 Exit Sub
 ErrorHandler:
 End Sub
+Function getXY(ByVal masStr As Variant) As Variant()
+Dim i As Integer, k As Integer, f As Integer
+Dim x As Variant, y As Variant
+
+On Error GoTo Shlapa
+
+For k = 0 To sizeMass(masStr)
+    For i = 1 To Len(masStr(k))
+        If Val(Mid$(masStr(k), i)) <> 0 Then
+            x = x & Strings.Mid(masStr(k), i, 1)
+            If Len(x) = 7 Then GoTo FindY
+            Else
+        End If
+    Next i
+    x = ""
+Next k
+
+FindY:
+For f = k + 1 To sizeMass(masStr)
+    For i = 1 To Len(masStr(f))
+        If Val(Mid$(masStr(k), i)) <> 0 Then
+            y = y & Strings.Mid(masStr(f), i, 1)
+            If Len(y) = 7 Then GoTo InitializeMass
+            Else
+        End If
+    Next i
+    y = ""
+Next f
+
+InitializeMass:
+Dim mass(2) As Variant
+mass(0) = x: mass(1) = y
+getXY = mass
+Exit Function
+
+Shlapa:
+Dim q As Double
+g = MsgBox("Шляпа с данными в функции getXY!!!")
+End Function
 Function sizeMass(mass As Variant) As Integer
     sizeMass = UBound(mass) - LBound(mass) + 1
 End Function
