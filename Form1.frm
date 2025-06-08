@@ -1,7 +1,7 @@
 VERSION 5.00
 Begin VB.Form Form1 
    BackColor       =   &H0000C0C0&
-   Caption         =   "Расчет среднего отклонения(v1.3)"
+   Caption         =   "Расчет среднего отклонения(v1.3.1)"
    ClientHeight    =   8970
    ClientLeft      =   2010
    ClientTop       =   3030
@@ -1007,8 +1007,6 @@ Public srednRazrFail As String
 Private Declare Sub Sleep Lib "kernel32" (ByVal dwMilliseconds As Long)
 Dim epoch As Currency
 
-
-
 Private Sub btnPokazArhiv_Click()
 Shell "C:\Windows\system32\notepad.exe" + " " + zapisRazrFail, vbNormalNoFocus
 End Sub
@@ -1052,6 +1050,7 @@ End If
 vd = pVd
 x = pXc: y = pYc: Xop = pXop: Yop = pYop
 If dX = 0 And dY = 0 Then
+    dX = Xr - x: dY = Yr - y
     Else
     Xr = x + dX: Yr = y + dY
 End If
@@ -1085,7 +1084,7 @@ Close #1
 ''''korrektyra
 Dim korDX As Integer, korDy As Integer
 
-korDX = pdX: korrdY = pdY
+korDX = dX: korrdY = dY
 
 x = pXc: y = pYc: Xop = pXop: Yop = pYop
 If dX = 0 And dY = 0 Then
