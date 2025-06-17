@@ -2,13 +2,71 @@ VERSION 5.00
 Begin VB.Form Form1 
    BackColor       =   &H0000C0C0&
    Caption         =   "Расчет среднего отклонения(v1.3.1)"
-   ClientHeight    =   8970
+   ClientHeight    =   10200
    ClientLeft      =   2010
    ClientTop       =   3030
-   ClientWidth     =   15840
+   ClientWidth     =   15795
    LinkTopic       =   "Form1"
-   ScaleHeight     =   8970
-   ScaleWidth      =   15840
+   ScaleHeight     =   10200
+   ScaleWidth      =   15795
+   Begin VB.TextBox poleTimer 
+      BackColor       =   &H0080FFFF&
+      BeginProperty Font 
+         Name            =   "MS Sans Serif"
+         Size            =   22.5
+         Charset         =   204
+         Weight          =   700
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
+      Height          =   600
+      Left            =   5880
+      TabIndex        =   58
+      Text            =   "0"
+      Top             =   9240
+      Width           =   2000
+   End
+   Begin VB.TextBox polePoletnoe 
+      BeginProperty Font 
+         Name            =   "MS Sans Serif"
+         Size            =   22.5
+         Charset         =   204
+         Weight          =   700
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
+      Height          =   600
+      Left            =   2040
+      TabIndex        =   57
+      Text            =   "0"
+      Top             =   9200
+      Width           =   1335
+   End
+   Begin VB.Timer Timer1 
+      Left            =   15000
+      Top             =   9480
+   End
+   Begin VB.CommandButton btnVustrel 
+      BackColor       =   &H0000FF00&
+      Caption         =   "ВЫСТРЕЛ"
+      BeginProperty Font 
+         Name            =   "MS Sans Serif"
+         Size            =   13.5
+         Charset         =   204
+         Weight          =   700
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
+      Height          =   800
+      Left            =   4000
+      Style           =   1  'Graphical
+      TabIndex        =   55
+      Top             =   9200
+      Width           =   1700
+   End
    Begin VB.CommandButton btnSprPoPoleXc 
       BackColor       =   &H0000FFFF&
       Caption         =   "?"
@@ -525,6 +583,24 @@ Begin VB.Form Form1
       Top             =   2100
       Width           =   2000
    End
+   Begin VB.Label Label27 
+      BackColor       =   &H0000C0C0&
+      Caption         =   "Полетное"
+      BeginProperty Font 
+         Name            =   "MS Sans Serif"
+         Size            =   13.5
+         Charset         =   204
+         Weight          =   700
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
+      Height          =   375
+      Left            =   240
+      TabIndex        =   56
+      Top             =   9200
+      Width           =   1455
+   End
    Begin VB.Label Label26 
       BackColor       =   &H0000C0C0&
       Caption         =   "Y"
@@ -1007,6 +1083,10 @@ Public srednRazrFail As String
 Private Declare Sub Sleep Lib "kernel32" (ByVal dwMilliseconds As Long)
 Dim epoch As Currency
 
+Dim totalSeconds As Integer ' Общее число прошедших секунд
+Dim poletnoe As Integer
+
+
 Private Sub btnPokazArhiv_Click()
 Shell "C:\Windows\system32\notepad.exe" + " " + zapisRazrFail, vbNormalNoFocus
 End Sub
@@ -1015,6 +1095,35 @@ Private Sub btnSprPoPoleXc_Click()
 Dim q As Double
 
 q = MsgBox("Вставлять из буфера: 1. Скопированные координаты с SAS.Планет. 2. Скопированное сообщение из 'Телеграмм' пересланное из 'Ветерок' по цели")
+End Sub
+
+Private Sub btnVustrel_Click()
+
+  If Timer1.Enabled Then
+        ' Если таймер включен, отключаем его и очищаем данные
+        btnVustrel.Caption = "ВЫСТРЕЛ"
+        poleTimer.BackColor = &H80FFFF
+        Timer1.Enabled = False
+        totalSeconds = 0
+        poleTimer.Text = ""
+    Else
+        ' Иначе начинаем измерение времени
+        btnVustrel.Caption = "СТОП"
+        Timer1.Interval = 1000     ' Интервал обновления таймера в миллисекундах
+        Timer1.Enabled = True       ' Запускаем таймер
+    End If
+    
+End Sub
+
+Private Sub Timer1_Timer()
+    Dim elapsedTime As Date
+    
+    poletnoe = polePoletnoe.Text
+    
+    totalSeconds = totalSeconds + 1           ' Увеличиваем счётчик секунд
+    If totalSeconds > poletnoe Then poleTimer.BackColor = &HFF&
+    poleTimer.Text = Format(totalSeconds / 60, "00") & ":" & Format(totalSeconds Mod 60, "00")
+    
 End Sub
 
 Private Sub clicDobavRazriv_Click()
