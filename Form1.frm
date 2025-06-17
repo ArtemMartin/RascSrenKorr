@@ -20,12 +20,12 @@ Begin VB.Form Form1
          Italic          =   0   'False
          Strikethrough   =   0   'False
       EndProperty
-      Height          =   600
-      Left            =   5880
+      Height          =   660
+      Left            =   6000
       TabIndex        =   58
       Text            =   "0"
       Top             =   9240
-      Width           =   2000
+      Width           =   1100
    End
    Begin VB.TextBox polePoletnoe 
       BeginProperty Font 
@@ -37,12 +37,12 @@ Begin VB.Form Form1
          Italic          =   0   'False
          Strikethrough   =   0   'False
       EndProperty
-      Height          =   600
+      Height          =   660
       Left            =   2040
       TabIndex        =   57
       Text            =   "0"
       Top             =   9200
-      Width           =   1335
+      Width           =   1000
    End
    Begin VB.Timer Timer1 
       Left            =   15000
@@ -64,7 +64,7 @@ Begin VB.Form Form1
       Left            =   4000
       Style           =   1  'Graphical
       TabIndex        =   55
-      Top             =   9200
+      Top             =   9150
       Width           =   1700
    End
    Begin VB.CommandButton btnSprPoPoleXc 
@@ -598,7 +598,7 @@ Begin VB.Form Form1
       Height          =   375
       Left            =   240
       TabIndex        =   56
-      Top             =   9200
+      Top             =   9300
       Width           =   1455
    End
    Begin VB.Label Label26 
@@ -1122,7 +1122,7 @@ Private Sub Timer1_Timer()
     
     totalSeconds = totalSeconds + 1           ' Увеличиваем счётчик секунд
     If totalSeconds > poletnoe Then poleTimer.BackColor = &HFF&
-    poleTimer.Text = Format(totalSeconds / 60, "00") & ":" & Format(totalSeconds Mod 60, "00")
+    poleTimer.Text = totalSeconds
     
 End Sub
 
