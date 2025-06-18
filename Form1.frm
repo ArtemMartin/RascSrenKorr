@@ -1193,6 +1193,8 @@ Close #1
 ''''korrektyra
 Dim korDX As Integer, korDy As Integer
 
+On Error GoTo ErrorHundler
+
 korDX = dX: korrdY = dY
 
 x = pXc: y = pYc: Xop = pXop: Yop = pYop
@@ -1227,7 +1229,11 @@ End If
 ''''''
 
 pdX = 0: pdY = 0: pXr = 0: pYr = 0
+Exit Sub
 
+ErrorHundler:
+Dim msq As Integer
+msq = MsgBox("поверить правильность ввода отклонений!!!")
 End Sub
 
 Private Sub clickOchistka_Click()
@@ -1625,7 +1631,6 @@ End If
 Exit Sub
 
 ErrorHadl:
-    pYc.SetFocus
 End Sub
 Private Sub pXr_KeyPress(KeyAscii As Integer)
 
@@ -1645,7 +1650,7 @@ End If
 Exit Sub
 
 ErrorHadl:
-    pYr.SetFocus
+    
 End Sub
 
 Private Sub Text1_Click()
