@@ -1298,17 +1298,10 @@ If menshee = 0 Then menshee = 1
 sootnoshenie = Round(bolshee / (menshee + 0.001))
 pSootnsh.Text = "1 / " + str(sootnoshenie)
 
-If sootnoshenie <= 2 Then
-    korP = 0
-    ElseIf sootnoshenie <= 4 Then
-    korP = Round(vd / (dXtus + 0.001))
+If dPr < 0 Then
+    pdPr = dPr
     Else
-        korP = Round((vd * 2) / (dXtus + 0.001))
-End If
-If plus > minus Then
-    pdPr = korP * -1
-    Else
-    pdPr = "+" & korP
+    pdPr = "+" & dPr
 End If
 
 Open zapisRazrFail For Append As #1
