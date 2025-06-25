@@ -9,6 +9,59 @@ Begin VB.Form Form1
    LinkTopic       =   "Form1"
    ScaleHeight     =   10200
    ScaleWidth      =   15795
+   Begin VB.CommandButton btnIzmOtkl 
+      BackColor       =   &H00FF00FF&
+      Caption         =   "Ввести Изменения"
+      BeginProperty Font 
+         Name            =   "MS Sans Serif"
+         Size            =   18
+         Charset         =   204
+         Weight          =   700
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
+      Height          =   700
+      Left            =   11100
+      Style           =   1  'Graphical
+      TabIndex        =   64
+      Top             =   8280
+      Width           =   4000
+   End
+   Begin VB.TextBox pDDovIzm 
+      BeginProperty Font 
+         Name            =   "MS Sans Serif"
+         Size            =   18
+         Charset         =   204
+         Weight          =   700
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
+      Height          =   600
+      Left            =   14160
+      TabIndex        =   63
+      Text            =   "0"
+      Top             =   7450
+      Width           =   700
+   End
+   Begin VB.TextBox pDPrIzm 
+      BeginProperty Font 
+         Name            =   "MS Sans Serif"
+         Size            =   18
+         Charset         =   204
+         Weight          =   700
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
+      Height          =   600
+      Left            =   11760
+      TabIndex        =   61
+      Text            =   "0"
+      Top             =   7450
+      Width           =   700
+   End
    Begin VB.TextBox poleTimer 
       BackColor       =   &H0080FFFF&
       BeginProperty Font 
@@ -150,7 +203,7 @@ Begin VB.Form Form1
          Italic          =   0   'False
          Strikethrough   =   0   'False
       EndProperty
-      Height          =   8295
+      Height          =   5895
       Left            =   11400
       MultiLine       =   -1  'True
       ScrollBars      =   2  'Vertical
@@ -582,6 +635,60 @@ Begin VB.Form Form1
       TabIndex        =   3
       Top             =   2100
       Width           =   2000
+   End
+   Begin VB.Label Label30 
+      BackColor       =   &H0000C0C0&
+      Caption         =   "Дов"
+      BeginProperty Font 
+         Name            =   "MS Sans Serif"
+         Size            =   13.5
+         Charset         =   204
+         Weight          =   700
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
+      Height          =   500
+      Left            =   13080
+      TabIndex        =   62
+      Top             =   7500
+      Width           =   700
+   End
+   Begin VB.Label Label29 
+      BackColor       =   &H0000C0C0&
+      Caption         =   "Пр"
+      BeginProperty Font 
+         Name            =   "MS Sans Serif"
+         Size            =   13.5
+         Charset         =   204
+         Weight          =   700
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
+      Height          =   375
+      Left            =   11040
+      TabIndex        =   60
+      Top             =   7500
+      Width           =   495
+   End
+   Begin VB.Label Label28 
+      BackColor       =   &H0000C0C0&
+      Caption         =   "Изменения отклонений с учетом корректуры"
+      BeginProperty Font 
+         Name            =   "MS Sans Serif"
+         Size            =   12
+         Charset         =   204
+         Weight          =   700
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
+      Height          =   735
+      Left            =   11760
+      TabIndex        =   59
+      Top             =   6600
+      Width           =   3375
    End
    Begin VB.Label Label27 
       BackColor       =   &H0000C0C0&
@@ -1086,6 +1193,58 @@ Dim epoch As Currency
 Dim totalSeconds As Integer ' Общее число прошедших секунд
 Dim poletnoe As Integer
 
+'изменение отклонений с учетом корректуры
+Private Sub btnIzmOtkl_Click()
+Dim dPr As Single, dDov As Single
+Dim srDX As Single, srDY As Single
+Dim xOP As Double, yOP As Double, xc As Double, yc As Double
+Dim dTopo As Double, ygolTopo As Double
+Dim newDTopo As Double, newYgolTopo As Double
+Dim dXTus As Integer, scetRazr As Integer
+
+On Error GoTo HandleError
+
+'получаем корректуры
+dPr = pDPrIzm: dDov = pDDovIzm
+
+'получаем средний с файла
+Open srednRazrFail For Input As #1
+Input #1, srDX, srDY
+Close #1
+
+'получаем координаты ОП и дельта икс тыс
+xOP = pXop: yOP = pYop: xc = pXc: yc = pYc
+dXTus = pdXtus: scetRazr = pvNRazr
+
+'определяем среднее по разрывам
+srDX = srDX / scetRazr: srDY = srDY / scetRazr
+
+'получаем дальность топо и угол топо по среднему до изменений
+proOGZ xc + srDX, yc + srDY, xOP, yOP, dTopo, ygolTopo
+
+'изменяем дальность м угол на корректуру
+newDTopo = dTopo + (dXTus * dPr)
+newYgolTopo = ygolTopo + dDov
+
+'получаем координаты нового среднего
+Dim newXsr As Double, newYsr As Double
+PGZ xOP, yOP, newYgolTopo, newDTopo, newXsr, newYsr
+
+'определяем новый средний
+srDX = (newXsr - xc) * scetRazr: srDY = (newYsr - yc) * scetRazr
+
+'записываем в файл новый средний
+Open srednRazrFail For Output As #1
+Write #1, srDX, srDY
+Close #1
+
+pDPrIzm.Text = "0": pDDovIzm.Text = "0"
+Exit Sub
+HandleError:
+Dim q As Integer
+q = MsgBox("Ошибка в процедуре <btnIzmOtkl>")
+
+End Sub
 
 Private Sub btnPokazArhiv_Click()
 Shell "C:\Windows\system32\notepad.exe" + " " + zapisRazrFail, vbNormalNoFocus
@@ -1115,6 +1274,23 @@ Private Sub btnVustrel_Click()
     
 End Sub
 
+Private Sub pDPrIzm_Click()
+pDPrIzm.Text = ""
+End Sub
+
+Private Sub pDPrIzm_KeyPress(KeyAscii As Integer)
+If KeyAscii = 13 Then
+    pDDovIzm.Text = ""
+    pDDovIzm.SetFocus
+    Else
+End If
+End Sub
+
+
+Private Sub polePoletnoe_Click()
+polePoletnoe.Text = ""
+End Sub
+
 Private Sub Timer1_Timer()
     Dim elapsedTime As Date
     
@@ -1131,7 +1307,7 @@ Dim dX As Single, dY As Single, nRazriv As Integer, nPlus As Integer, nMinus As 
 Dim dXsFail As Single, dYsFail As Single
 Dim schetchik As Integer, vd As Integer
 Dim x As Single, y As Single, Xr As Single, Yr As Single
-Dim Xop As Single, Yop As Single
+Dim xOP As Single, yOP As Single
 
 schetchik = 1
 dX = pdX: dY = pdY: nRazriv = pvNRazr + schetchik
@@ -1157,15 +1333,15 @@ End If
 
 'считаем знаки
 vd = pVd
-x = pXc: y = pYc: Xop = pXop: Yop = pYop
+x = pXc: y = pYc: xOP = pXop: yOP = pYop
 If dX = 0 And dY = 0 Then
     dX = Xr - x: dY = Yr - y
     Else
     Xr = x + dX: Yr = y + dY
 End If
-proOGZ x, y, Xop, Yop, Dt, Ygt
-dXtus = pdXtus
-podRASCHETXY Xr, Yr, Xop, Yop, dXtus, Dt, Ygt, dD, dDov, dPr
+proOGZ x, y, xOP, yOP, Dt, Ygt
+dXTus = pdXtus
+podRASCHETXY Xr, Yr, xOP, yOP, dXTus, Dt, Ygt, dD, dDov, dPr
 nPlus = pPlus: nMinus = pMinus
 If dX = 0 And dY = 0 And Xr = 0 And Yr = 0 Then
     nPlus = nPlus + 1: nMinus = nMinus + 1
@@ -1197,15 +1373,15 @@ On Error GoTo ErrorHundler
 
 korDX = dX: korrdY = dY
 
-x = pXc: y = pYc: Xop = pXop: Yop = pYop
+x = pXc: y = pYc: xOP = pXop: yOP = pYop
 If dX = 0 And dY = 0 Then
     Else
     Xr = x + korDX: Yr = y + korrdY
 End If
-proOGZ x, y, Xop, Yop, Dt, Ygt
+proOGZ x, y, xOP, yOP, Dt, Ygt
 
-dXtus = pdXtus
-podRASCHETXY Xr, Yr, Xop, Yop, dXtus, Dt, Ygt, dD, dDov, dPr
+dXTus = pdXtus
+podRASCHETXY Xr, Yr, xOP, yOP, dXTus, Dt, Ygt, dD, dDov, dPr
 
 If dDov > 0 Then
     If dDov < 10 Then
@@ -1252,9 +1428,9 @@ pvNRazr = 0: pvSrDx = 0: pvSrdY = 0: pdX = 0: pdY = 0: pPlus = 0: pMinus = 0: pd
 End Sub
 
 Private Sub clickReshSredn_Click()
-Dim nRazriv As Integer, srdX As Single, srdY As Single
+Dim nRazriv As Integer, srDX As Single, srDY As Single
 Dim dXsFail As Single, dYsFail As Single
-Dim x As Single, y As Single, Xop As Single, Yop As Single
+Dim x As Single, y As Single, xOP As Single, yOP As Single
 Dim bolshee As Single, menshee As Single, plus As Single, minus As Single, sootnoshenie As Single, vd As Single, korP As Single
 
 nRazriv = pvNRazr
@@ -1263,16 +1439,16 @@ Open srednRazrFail For Input As #1
 Input #1, dXsFail, dYsFail
 Close #1
 
-srdX = Round(dXsFail / (nRazriv + 0.0001))
-srdY = Round(dYsFail / (nRazriv + 0.0001))
+srDX = Round(dXsFail / (nRazriv + 0.0001))
+srDY = Round(dYsFail / (nRazriv + 0.0001))
 
-pvSrDx = srdX: pvSrdY = srdY
+pvSrDx = srDX: pvSrdY = srDY
 
-x = pXc: y = pYc: Xop = pXop: Yop = pYop
-Xr = x + srdX: Yr = y + srdY
-proOGZ x, y, Xop, Yop, Dt, Ygt
-dXtus = pdXtus: vd = pVd
-podRASCHETXY Xr, Yr, Xop, Yop, dXtus, Dt, Ygt, dD, dDov, dPr
+x = pXc: y = pYc: xOP = pXop: yOP = pYop
+Xr = x + srDX: Yr = y + srDY
+proOGZ x, y, xOP, yOP, Dt, Ygt
+dXTus = pdXtus: vd = pVd
+podRASCHETXY Xr, Yr, xOP, yOP, dXTus, Dt, Ygt, dD, dDov, dPr
 
 If dDov > 0 Then
     If dDov < 10 Then
@@ -1305,7 +1481,7 @@ If dPr < 0 Then
 End If
 
 Open zapisRazrFail For Append As #1
-Write #1, "К-во разрывов = " & nRazriv & ", Средн : dX = " & srdX & " dY = " & srdY
+Write #1, "К-во разрывов = " & nRazriv & ", Средн : dX = " & srDX & " dY = " & srDY
 Write #1, "Корректура в прицел = " & pdPr & ", Корректура в угломер = " & pdDov.Text
 Write #1, "+" & plus & "  " & "-" & minus & ", Соотношение знаков = " & pSootnsh.Text
 'добавить соотношение
@@ -1382,20 +1558,20 @@ If KeyAscii = 13 Then
     Else
     End If
 End Sub
-Sub podRASCHETXY(ByVal Xr As Single, ByVal Yr As Single, ByVal Xop As Single, ByVal Yop As Single, ByVal dXtus As Single, ByVal Dt As Single, ByVal Ygolt As Single, dD, dDov, dPr)
+Sub podRASCHETXY(ByVal Xr As Single, ByVal Yr As Single, ByVal xOP As Single, ByVal yOP As Single, ByVal dXTus As Single, ByVal Dt As Single, ByVal Ygolt As Single, dD, dDov, dPr)
         
-proOGZ Xr, Yr, Xop, Yop, Dtr, Ygoltr
+proOGZ Xr, Yr, xOP, yOP, Dtr, Ygoltr
 dD = Round(Dt - Dtr)
  dDov = Round(Ygolt - Ygoltr)
- dPr = Round(dD / (dXtus + 0.001))
+ dPr = Round(dD / (dXTus + 0.001))
 
 End Sub
 
-Sub proOGZ(ByVal xC As Single, ByVal yC As Single, ByVal Xop As Single, ByVal Yop As Single, Dt, Ygt)
+Sub proOGZ(ByVal xc As Single, ByVal yc As Single, ByVal xOP As Single, ByVal yOP As Single, Dt, Ygt)
 Dim dxc As Single, dyc As Single
 
-dxc = xC - Xop
-dyc = yC - Yop
+dxc = xc - xOP
+dyc = yc - yOP
  Dt = Sqr(dxc ^ 2 + dyc ^ 2)
  Ar = Abs(Atn(dyc / (dxc + 0.1)) / 3.141592 * 30) * 100
  If dxc > 0 And dyc > 0 Then Ygt = Int(Ar)
@@ -1404,7 +1580,10 @@ dyc = yC - Yop
  If dxc > 0 And dyc < 0 Then Ygt = Int(6000 - Ar)
 
 End Sub
-
+Sub PGZ(ByVal x As Double, ByVal y As Double, ByVal a As Double, ByVal d As Double, xc, yc)
+xc = Cos(a / 100 * 6 * 3.141592 / 180) * d + x
+yc = Sin(a / 100 * 6 * 3.141592 / 180) * d + y
+End Sub
 
 Private Sub pdXtus_Click()
 pdXtus.Text = ""
@@ -1416,29 +1595,29 @@ End Sub
 Private Sub poleNZeli_Click()
 Dim z(1 To 10) As String
 Dim nz As String
-Dim xC As Single, yC As Single, hc As Single
+Dim xc As Single, yc As Single, hc As Single
 nz = poleNZeli
 1011 Open "D:\YO_NA\zeli" For Input As #1
 101111 If EOF(1) Then GoTo 1012
    Input #1, z(1), z(2), z(3), z(4), z(5), z(6)
-   If z(1) = nz Then xC = z(2): yC = z(3): hc = z(4): GoTo 1012
+   If z(1) = nz Then xc = z(2): yc = z(3): hc = z(4): GoTo 1012
         GoTo 101111
 1012 Close #1
-pXc = xC: pYc = yC
+pXc = xc: pYc = yc
 End Sub
 Private Sub poleNZeli_KeyDown(KeyCode As Integer, Shift As Integer)
 Dim z(1 To 10) As String
 Dim nz As String
-Dim xC As Single, yC As Single, hc As Single
+Dim xc As Single, yc As Single, hc As Single
 nz = poleNZeli
 If KeyCode = 13 Then
 1011    Open "D:\YO_NA\zeli" For Input As #1
 101111  If EOF(1) Then GoTo 1012
         Input #1, z(1), z(2), z(3), z(4), z(5), z(6)
-        If z(1) = nz Then xC = z(2): yC = z(3): hc = z(4): GoTo 1012
+        If z(1) = nz Then xc = z(2): yc = z(3): hc = z(4): GoTo 1012
         GoTo 101111
 1012    Close #1
-        pXc = xC: pYc = yC
+        pXc = xc: pYc = yc
     Else
 End If
 End Sub
