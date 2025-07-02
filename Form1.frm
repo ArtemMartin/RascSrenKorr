@@ -1,5 +1,6 @@
 VERSION 5.00
 Begin VB.Form Form1 
+   AutoRedraw      =   -1  'True
    BackColor       =   &H0000C0C0&
    Caption         =   "Расчет среднего отклонения(v1.3.1)"
    ClientHeight    =   10200
@@ -9,6 +10,32 @@ Begin VB.Form Form1
    LinkTopic       =   "Form1"
    ScaleHeight     =   10200
    ScaleWidth      =   15795
+   Begin VB.Frame Frame1 
+      BackColor       =   &H000080FF&
+      Height          =   975
+      Left            =   7560
+      TabIndex        =   65
+      Top             =   9000
+      Width           =   3375
+      Begin VB.CheckBox Check1 
+         BackColor       =   &H000080FF&
+         Caption         =   "Минус 0,3 в корректуру прицела"
+         BeginProperty Font 
+            Name            =   "MS Sans Serif"
+            Size            =   12
+            Charset         =   204
+            Weight          =   700
+            Underline       =   0   'False
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+         Height          =   615
+         Left            =   240
+         TabIndex        =   66
+         Top             =   240
+         Width           =   2895
+      End
+   End
    Begin VB.CommandButton btnIzmOtkl 
       BackColor       =   &H00FF00FF&
       Caption         =   "Ввести Изменения"
@@ -1261,6 +1288,7 @@ Private Sub btnVustrel_Click()
   If Timer1.Enabled Then
         ' Если таймер включен, отключаем его и очищаем данные
         btnVustrel.Caption = "ВЫСТРЕЛ"
+        btnVustrel.BackColor = &HFF00&
         poleTimer.BackColor = &H80FFFF
         Timer1.Enabled = False
         totalSeconds = 0
@@ -1268,11 +1296,13 @@ Private Sub btnVustrel_Click()
     Else
         ' Иначе начинаем измерение времени
         btnVustrel.Caption = "СТОП"
+        btnVustrel.BackColor = &HFF&
         Timer1.Interval = 1000     ' Интервал обновления таймера в миллисекундах
         Timer1.Enabled = True       ' Запускаем таймер
     End If
     
 End Sub
+
 
 Private Sub pDPrIzm_Click()
 pDPrIzm.Text = ""
@@ -1382,6 +1412,9 @@ proOGZ x, y, xOP, yOP, Dt, Ygt
 
 dXTus = pdXtus
 podRASCHETXY Xr, Yr, xOP, yOP, dXTus, Dt, Ygt, dD, dDov, dPr
+
+'уменшаем корректуру в прицел на 0,3
+If Check1 = 1 Then dPr = Round(dPr * 0.75)
 
 If dDov > 0 Then
     If dDov < 10 Then
