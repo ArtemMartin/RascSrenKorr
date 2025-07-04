@@ -1414,7 +1414,7 @@ dXTus = pdXtus
 podRASCHETXY Xr, Yr, xOP, yOP, dXTus, Dt, Ygt, dD, dDov, dPr
 
 'уменшаем корректуру в прицел на 0,3
-If Check1 = 1 Then dPr = Round(dPr * 0.75)
+If Check1 = 1 Then dPr = Round(dPr * 0.66)
 
 If dDov > 0 Then
     If dDov < 10 Then
